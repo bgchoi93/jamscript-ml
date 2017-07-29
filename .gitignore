@@ -1,3 +1,4 @@
 .idea/
 jamscript-ml.iml
 */.ipynb_checkpoints
+*/__pycache__
