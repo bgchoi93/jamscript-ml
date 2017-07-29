@@ -1,6 +1,6 @@
 class Neuron(object):
-    def __init__(self, id, activation_function, inputs, weights, bias):
-        self.id = id
+    def __init__(self, neuron_id, activation_function, inputs, weights, bias):
+        self._neuron_id = neuron_id
         self._activation_function = activation_function
         self._inputs = inputs
         self._weights = weights
@@ -8,6 +8,11 @@ class Neuron(object):
 
     def calculate(self):
         pass
+
+
+    def get_neuron_id(self):
+        return self._neuron_id
+
 
     def get_activation_function(self):
         return self._activation_function

@@ -1,4 +1,4 @@
-import prototype.app.thing.neuron.Neuron as neuron
+import prototype.app.thing.neuron.neuron as neuron
 
 class Layer(object)
 	def __init__(self,outLayer,neuronsThisLayer,intNeuronsNextLayer)

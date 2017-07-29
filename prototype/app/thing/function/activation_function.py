@@ -1,4 +1,4 @@
-class ActivationFunction(object):
+class ActivationFunction():
 
     def get_function(self):
         pass
