@@ -1,8 +1,8 @@
 class Neuron(object):
-    def __init__(self, id, activation_function, weights, bias):
+    def __init__(self, id, activation_function, inputWeights, bias):
         self.id = id
         self._activation_function = activation_function
-        self._weights = weights
+        self._weights = inputWeights
         self._bias = bias
 
     def calculate(self):
