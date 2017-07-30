@@ -1,4 +1,4 @@
-from ActivationFunction import ActivationFunction
+from prototype.app.thing.function.activation_function import ActivationFunction
 
 class NotImplementedFunction(ActivationFunction):
 

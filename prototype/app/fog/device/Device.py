@@ -14,5 +14,5 @@ class Device(object)
 	def __neuron_complete(neuronId,output):
 		#remove neuron from _neurons
 		#	decrement
-		#return neuronId,output
+		#return neuronId,output	
 
