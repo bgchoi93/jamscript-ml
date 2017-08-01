@@ -1,4 +1,4 @@
-from prototype.app.thing.stream.stream import Stream;
+from prototype.app.thing.model.stream.stream import Stream;
 
 
 class SourceStream(Stream):

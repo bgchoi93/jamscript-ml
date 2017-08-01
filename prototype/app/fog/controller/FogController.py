@@ -1,8 +1,4 @@
 #  handles assigning neuron computation to different devices
-from prototype.app.fog.layer import Layer as layer
-from prototype.app.thing.neuron import Neuron as neuron
-from prototype.app.thing.neuron import FeedForwardNeuron as ffNeuron
-from prototype.app.fog.network import Network as network
 
 class FogController(object):
 

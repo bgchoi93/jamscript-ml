@@ -1,5 +1,6 @@
-import prototype.app.thing.function.activation_function_factory as aff
-from prototype.app.thing.neuron.neuron import Neuron
+from prototype.app.thing.model.neuron.neuron import Neuron
+
+import prototype.app.thing.model.function.activation_function_factory as aff
 
 
 class FeedForwardNeuron(Neuron):

@@ -1,5 +1,6 @@
-from prototype.app.thing.function.activation_function import ActivationFunction
 import math
+
+from prototype.app.thing.model.function.activation_function import ActivationFunction
 
 
 class SigmoidFunction(ActivationFunction):
