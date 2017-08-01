@@ -1,29 +1,54 @@
 #  handles assigning neuron computation to different devices
+from prototype.app.fog.layer import Layer as layer
+from prototype.app.thing.neuron import Neuron as neuron
+from prototype.app.thing.neuron import FeedForwardNeuron as ffNeuron
+from prototype.app.fog.network import Network as network
+from prototype.app.fog.device import Device as Device
+import numpy as numpy
 
 class FogController(object):
 
     def __init__(self, network, devices, output_device, input_device):
-        self.network = network #load from redis
-        self.devices = devices #for prototype simulation purposes, devices will be controller processes
-        self.output_device = output_device #process/device from which output will go to
-        self.output_results = [] #ordered array of results from neuron computation corresponding to ordering of the neurons
-        self.layer_neurons = Queue()
+        self._network = network #load from redis
+        if devices is None: 
+        	self._devices = []
+        else:
+        	self._devices = devices #for prototype simulation purposes, devices will be controller processes
+        self._output_device = output_device #process/device from which output will go to
+        self._output_results = [] #ordered array of results from neuron computation corresponding to ordering of the neurons
+        self._layer_neurons = []
 
-    def __add_device(device):
+    def add_device(deviceId):
     	#add device to list
+    	device = Device(deviceId,None)
+    	self._devices += [device]
 
-    def __remove_device(device):
+    def remove_device(device):
     	#remove device from devices list
+    	self._devices.remove(device)
+    	
 
-    def __device_on_disconnect(device):
+
+
+    def device_on_disconnect(device):
     	#take neurons in device objects
     	#add to task queue
 
-    def __task_device(device):
-    	#add neuron to device _neurons
-    	#send neuron task to device through device.__do_computation() 
+    	self.layer_neurons += device._neurons
+    	self.remove_device(device)
+    	def sort_function(device):
+    		return device._neurons_count
+    	self._devices = sorted(self._devices, key = sort_function)
 
-    def __layer_computation(layerId):
+
+
+
+    def task_device(device,neuron):
+    	#add neuron to device _neurons
+    	#send neuron task to device through device.do_computation() 
+    	device.add_neuron(neuron)
+
+    def layer_computation(layerId):
     	#read layer from redis
     	#add all neurons to task queue
     	#reinit layer_neurons
@@ -38,25 +63,28 @@ class FogController(object):
     	#	neuron = task queue pop
     	#end while
 
-    def __neuron_done(neuronId,output):
+    def neuron_done(deviceId,neuronId,output):
     	#add output to output array at position [neuronId]
     	#check if layer_neurons is empty
-    	#	__layer_done
+    	#	layer_done
     	#return
 
-    def __layer_done():
+    def layer_done():
     	#input = output_results
     	#send input to devices
     	#__layer_computation
 
 
-    def __compute_network
+    def compute_network():
+
+if __name__=="__main__":
+	#test suite 
 
 ### ------------- batch tasking vs single node tasking at a time -------------- ###
 	#single node tasking is the superior solution
 	#proof:
 	#assumption: send time for fog to device is aprox equivalent in both cases (same amount of data)
-	#case 1: computation time of node [c(n)] => fog->device information sending f(d)
+	#case 1: computation time of node [c(n)] >= fog->device information sending f(d)
 	#	since both tasking scenarios send the same of data, upload of data to device ends at approximately the same point
 	#	we start computing our first node faster in single tasking however, so total time from beginning of data transfer
 	#	to final response is lowered in this case 
