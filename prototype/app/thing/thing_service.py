@@ -28,6 +28,9 @@ def health():
 
     return str(health)
 
+@app.route('/task', methods=['GET'])
+def get_number_of_tasks():
+    return str(thing.get_source_stream().qsize())
 
 
 @app.route('/task', methods=['POST'])
@@ -38,7 +41,14 @@ def new_task():
         abort(500)
     else:
         thing.assign_new_task(params["neuron_id"], params["inputs"])
-        return "Successful"
+        return "Current number of tasks: " + str(thing.get_source_stream().qsize())
 
-# @app.route('/process', methods=['POST'])
-# def process():
+
+@app.route('/process', methods=['POST'])
+def process():
+    return str(thing.compute_next_task())
+
+
+@app.route('/result', methods=['GET'])
+def get_result():
+    return str(thing.get_destination_stream().get())

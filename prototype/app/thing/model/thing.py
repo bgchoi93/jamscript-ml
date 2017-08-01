@@ -34,7 +34,7 @@ class Thing:
 
     def compute_next_task(self):
         if self.__source_stream.empty():
-            pass
+            return False
         else:
             #  retrieve next task
             task = self.__source_stream.get()
@@ -57,3 +57,4 @@ class Thing:
 
             #  return computed result to destination stream
             self.__destination_stream.put({"neuron_id": neuron.get_neuron_id(), "output": neuron.calculate()})
+            return True
