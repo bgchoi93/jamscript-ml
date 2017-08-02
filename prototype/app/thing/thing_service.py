@@ -1,6 +1,8 @@
 from flask import Flask, request, abort
-
+import requests
+import json
 import redis
+import threading
 
 from prototype.app.thing.model.thing import Thing
 
@@ -8,6 +10,9 @@ from prototype.app.thing.model.thing import Thing
 app = Flask(__name__)
 
 thing = Thing()
+
+destination_url="http://localhost:5000"
+headers = {'Content-Type': 'application/json'}
 
 @app.route('/ping')
 def ping():
@@ -41,13 +46,15 @@ def new_task():
         abort(500)
     else:
         thing.assign_new_task(params["neuron_id"], params["inputs"])
+        process_thread = threading.Thread(target=process())
+        process_thread.start()
         return "Current number of tasks: " + str(thing.get_source_stream().qsize())
 
 
-@app.route('/process', methods=['POST'])
 def process():
-    return str(thing.compute_next_task())
-
+    result = thing.compute_next_task()
+    if result:
+        requests.post(destination_url, json.dumps(thing.get_destination_stream().get()), headers)
 
 @app.route('/result', methods=['GET'])
 def get_result():
