@@ -28,6 +28,8 @@ class Thing:
 
 
     def assign_new_task(self, neuron_id, inputs):
+        if inputs:
+           self.__storage.connection.rpush("L0.C", inputs) 
         task = Task(neuron_id, inputs)
         self.__source_stream.put(task)
 
@@ -43,6 +45,8 @@ class Thing:
             id = task.get_neuron_id()
 
             inputs = list(map(lambda x: float(x), task.get_inputs()))
+            if not inputs:
+                inputs = list(map(lambda x: float(x), self.__storage.connection.lrange("L0.C", 0, -1)))
 
             weights_dict = OrderedDict(self.__storage.connection.hgetall("L1." + task.get_neuron_id()))
             del weights_dict["bias"]
