@@ -1,4 +1,5 @@
-#  handles assigning neuron computation to different devices
+# handles assigning neuron computation to different devices
+# create one of these objects every time you receive a problem 
 from prototype.app.fog.layer import Layer as layer
 from prototype.app.thing.neuron import Neuron as neuron
 from prototype.app.thing.neuron import FeedForwardNeuron as ffNeuron
@@ -9,7 +10,7 @@ import numpy as numpy
 class FogController(object):
 
     def __init__(self, network, devices, output_device, input_device):
-        self._network = network #load from redis
+        self._network = network #network string name
         if devices is None: 
         	self._devices = []
         else:
@@ -49,7 +50,9 @@ class FogController(object):
     	device.add_neuron(neuron)
 
     def layer_computation(layerId):
+    	
     	#read layer from redis
+    	task_Queue = Queue()
     	#add all neurons to task queue
     	#reinit layer_neurons
     	#add all neurons to layer_neurons
