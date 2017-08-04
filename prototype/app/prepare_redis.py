@@ -8,17 +8,17 @@ def main():
     rdb.sadd('networks', 'ffnn')
 
     #  define layers
-    rdb.zadd('ffnn:layers', 'ffnn:l0', 0, 'ffnn:l1', 1, 'ffnn:l2', 2)
+    rdb.zadd('ffnn:layers', 0.0, 'ffnn:l0', 1.0, 'ffnn:l1', 2.0, 'ffnn:l2')
 
     # LAYER 0: Input layer
     #  define neurons of ffnn:l0
     rdb.hset('ffnn:l0', 'neurons', 'ffnn:l0:neurons')
-    rdb.zadd('ffnn:l0:neurons', 'ffnn:l0:n0', 0, 'ffnn:l0:n1', 1)
+    rdb.zadd('ffnn:l0:neurons', 0.0, 'ffnn:l0:n0', 1.0, 'ffnn:l0:n1')
 
     # LAYER 1 : Hidden layer
     #  define neurons of ffnn:l1
     rdb.hset('ffnn:l1', 'neurons', 'ffnn:l1:neurons')
-    rdb.zadd('ffnn:l1:neurons', 'ffnn:l1:n0', 0, 'ffnn:l1:n1', 1)
+    rdb.zadd('ffnn:l1:neurons', 0.0, 'ffnn:l1:n0', 1.0, 'ffnn:l1:n1')
 
     #  neuron ffnn:l1:n0
     ffnn_l1_n0 = {
@@ -47,7 +47,7 @@ def main():
     # LAYER 2 : Output layer
     # define neurons of ffnn:l2
     rdb.hset('ffnn:l2', 'neurons', 'ffnn:l2:neurons')
-    rdb.zadd('ffnn:l2:neurons', 'ffnn:l2:n0', 0, 'ffnn:l2:n1', 1, 'ffnn:l2:n2', 2, 'ffnn:l2:n3', 3)
+    rdb.zadd('ffnn:l2:neurons', 0.0, 'ffnn:l2:n0', 1.0, 'ffnn:l2:n1', 2.0, 'ffnn:l2:n2', 3.0, 'ffnn:l2:n3')
 
     #  neuron ffnn:l2:n0
     ffnn_l2_n0 = {
@@ -96,3 +96,6 @@ def main():
         -38.89588165283203,
         9.490970611572266
     )
+
+if __name__ == "__main__":
+    main()
