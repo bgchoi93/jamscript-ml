@@ -1,6 +1,12 @@
 import numpy as numpy
-from flask import Flask, request,
+from flask import Flask, request
 from prototype.app.fog.controller import FogController as fog
+from prototype.app.fog.server.Server import Server as Server
+
+#service to receive http request
+#
+#
+
 
 server = Server()
 
@@ -8,12 +14,35 @@ app = Flask(__name__)
 
 @app.route('/')
 def hello_world():
+	print (request.remote_addr)
 	return 'Hello World!'
 
+
+#create new fog controller for a new problem domain
+#
+#
 @app.route('/<problemName>', methods = ['POST','PUT'])
 def ml_problem(problemName):
-    # show the user profile for that user
     if request.method == 'POST':
-    	newProblem = fog(problemName,server.get_devices(),request.remote_addr)
+    	server.add_device(request.remote_addr)
+    	server.new_learning_problem(problemName,request.remote_addr)
     	return 'problemName %s' % problemName
-    else
+
+
+
+#a neuron of the problemName domain has completed, run appropriate operations
+#
+#
+@app.route('/<problemName>/neuron_complete', methods = ['POST'])
+def neuron_complete(problemName):
+	if request.method == 'POST':
+		server._controllers[problemName].neuron_done(request.remote_addr,request.form[neuronId],request.form[output])
+
+
+
+#add a device to the network
+#
+#
+@app.route('/subscribe',methods = ['POST'])
+def add_device():
+	server.add_device(request.remote_addr)

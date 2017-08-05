@@ -1,86 +1,71 @@
 # handles assigning neuron computation to different devices
 # create one of these objects every time you receive a problem 
-from prototype.app.fog.layer import Layer as layer
-from prototype.app.thing.neuron import Neuron as neuron
-from prototype.app.thing.neuron import FeedForwardNeuron as ffNeuron
-from prototype.app.fog.network import Network as network
 from prototype.app.fog.device import Device as Device
 import numpy as numpy
-
-class FogController(object):
-
-    def __init__(self, network, devices, output_device, input_device):
+class FogController:
+    def __init__(self, network, devices, output_device):
         self._network = network #network string name
-        if devices is None: 
-        	self._devices = []
-        else:
-        	self._devices = devices #for prototype simulation purposes, devices will be controller processes
+        self._devices = []
+        for device in devices:
+            add_device(device)
         self._output_device = output_device #process/device from which output will go to
         self._output_results = [] #ordered array of results from neuron computation corresponding to ordering of the neurons
-        self._layer_neurons = []
-
-    def add_device(deviceId):
+        self._layer_neurons = [] #array of neurons
+        self._network = compute_network(0)
+    def ping_devices(self):
+        pass
+        #for device in self._devices:
+            #ping device
+            #remove if no response
+    def add_device(self,deviceId):
     	#add device to list
-    	device = Device(deviceId,None)
-    	self._devices += [device]
+        device = Device(deviceId,None)
+        self._devices += [device]
 
-    def remove_device(device):
-    	#remove device from devices list
-    	self._devices.remove(device)
-    	
-
-
-
-    def device_on_disconnect(device):
-    	#take neurons in device objects
-    	#add to task queue
-
-    	self.layer_neurons += device._neurons
-    	self.remove_device(device)
-    	def sort_function(device):
-    		return device._neurons_count
-    	self._devices = sorted(self._devices, key = sort_function)
-
-
-
-
-    def task_device(device,neuron):
-    	#add neuron to device _neurons
-    	#send neuron task to device through device.do_computation() 
+    def remove_device(self,deviceId):
+        for device in self._devices:
+            if (device._device == deviceId):
+                self._devices.remove(device)
+        def sort_function(device):
+            return device._neurons_count
+        self._devices = sorted(self._devices, key = sort_function)
+    def send_inputs(self,inputs):
+        self.ping_devices()
+    def task_device(self,device,neuron):
     	device.add_neuron(neuron)
-
-    def layer_computation(layerId):
-    	
-    	#read layer from redis
-    	task_Queue = Queue()
-    	#add all neurons to task queue
-    	#reinit layer_neurons
-    	#add all neurons to layer_neurons
-    	#neuron = task queue pop
-    	#while neurons in task queue remain
-    	#	for device in devices
-    	#		ping device (if necessary)
-    	#		__create_task(device,neuron)
-       	#		remove neuron from task queue
-    	#	end for
-    	#	neuron = task queue pop
-    	#end while
-
-    def neuron_done(deviceId,neuronId,output):
-    	#add output to output array at position [neuronId]
-    	#check if layer_neurons is empty
-    	#	layer_done
-    	#return
-
-    def layer_done():
-    	#input = output_results
-    	#send input to devices
-    	#__layer_computation
-
-
-    def compute_network():
-
+    def layer_computation(self,layerId):
+        task_Queue = Queue()
+        for neuron in self._layer_neurons:
+            task_Queue.put(neuron)
+        neuron= task_Queue.get()
+        while not task_Queue.empty():
+            for device in self._devices:
+                task_device(device,neuron)
+            neuron=task_Queue.get()
+    def neuron_done(self,deviceId,neuronId,output):
+        self._output_results[neuronId] = output
+        if (len(self._layer_neurons) == 0):
+            self.layer_done()
+        return
+    def layer_done(self):
+    	inputs = self._output_results
+    	self.send_inputs(self,inputs)
+    	self._network()
+    def compute_network(self,inputs):
+        layer_num = inputs
+        def increment_layer():
+            nonlocal layer_num
+            layer_num += 1
+            print(layer_num)
+        return increment_layer
+    def send_results():
+        pass
 if __name__=="__main__":
+    fogger = FogController()
+    fogger.compute_network(0)
+    closure = fogger.compute_network()
+    closure()
+    closure()
 	#test suite 
 
 ### ------------- batch tasking vs single node tasking at a time -------------- ###
