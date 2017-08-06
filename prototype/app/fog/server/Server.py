@@ -11,8 +11,8 @@ class Server(object):
         self._controllers = {}
         self._db = redis.StrictRedis(host='localhost',port=6379,db=0)
 
-    def new_learning_problem(networkString,outputDevice):
-        new_fog = fog(networkString,self._devices,outputDevice)
+    def new_learning_problem(networkString,outputDevice,inputs):
+        new_fog = fog(networkString,self._devices,outputDevice,inputs)
         self._controllers[networkString] = new_fog
         return new_fog
 

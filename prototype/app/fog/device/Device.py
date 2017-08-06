@@ -1,4 +1,10 @@
+#handle sending requests here
+
+import json
 import numpy as numpy 
+import requests
+
+headers = {'Content-type':'application/json','Accept':'application/json'}
 
 class Device:
 	def __init__(self,device,neurons,__neuron_complete_callback):
@@ -14,27 +20,24 @@ class Device:
 
 		
 
-	def add_neuron(neuron):
-		#_neurons.add(neuron)
-		#_neurons_count ++
+	def add_neuron(neuron,inputs):
 		self._neurons += [neuron]
 		self._neurons_count += 1
-		self.neuron_computation(neuron)
+		self.neuron_computation(neuron,inputs)
 
-	def neuron_computation(neuron):
-		#device.do_computation(neuron) send to device
-		pass
+	def neuron_computation(neuron,inputs):
+		payload = {'neuron_id':neuron}
+		if inputs != None: 
+			payload['inputs'] = inputs
+		task = requests.post("http://localhost:5000/task", headers=headers, data=payload)
+		return task.json()
 
 
 
-	def neuron_complete(neuronId,output,callback):
-		#remove neuron from _neurons
-		#	decrement
-		#return neuronId,output	
+	def neuron_complete(neuronId):
 		for i in range(0,len(self._neurons)):
 			if neuron.id == neuronId:
 				self._neurons = self._neurons[0:i] + self._neurons[i+1:]
 				self._neurons_count -= 1
-				callback(neuronId,output)
 
 
