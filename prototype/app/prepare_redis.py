@@ -3,12 +3,12 @@ import redis
 
 def main():
     rdb = redis.StrictRedis('localhost', 6379, 0, charset="utf-8", decode_responses=True)
-
+    
     #  define networks
     rdb.sadd('networks', 'ffnn')
 
     #  define layers
-    rdb.zadd('ffnn:layers', 0.0, 'ffnn:l0', 1.0, 'ffnn:l1', 2.0, 'ffnn:l2')
+    rdb.zadd('ffnn', 0.0, 'ffnn:l0', 1.0, 'ffnn:l1', 2.0, 'ffnn:l2')
 
     # LAYER 0: Input layer
     #  define neurons of ffnn:l0
