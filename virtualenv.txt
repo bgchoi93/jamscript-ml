@@ -1,0 +1,6 @@
+name: jamscript
+
+command to activate: . jamscript/bin/activate
+
+to deactivate: deactivate
+

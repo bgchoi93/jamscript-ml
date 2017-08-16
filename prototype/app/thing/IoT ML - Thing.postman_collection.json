@@ -1,0 +1,86 @@
+{
+	"variables": [],
+	"info": {
+		"name": "IoT ML - Thing",
+		"_postman_id": "a08cb50b-28e0-1ad3-7a94-65d699e62d08",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Ping",
+			"request": {
+				"url": "http://localhost:5000/ping",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Health",
+			"request": {
+				"url": "http://localhost:5000/health",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "New Task",
+			"request": {
+				"url": "http://localhost:5000/task",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"neuron_id\": \"N0\",\n\t\"inputs\": [\n\t\t\"0.3\",\n\t\t\"0.1\",\n\t\t\"0.8\",\n\t\t\"0.2\"\n\t]\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get Number of Tasks",
+			"request": {
+				"url": "http://localhost:5000/task",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Process",
+			"request": {
+				"url": "http://localhost:5000/process",
+				"method": "POST",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get Result",
+			"request": {
+				"url": "http://localhost:5000/result",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}
