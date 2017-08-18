@@ -3,26 +3,24 @@
 #include <math.h>
 
 int main() {
-	struct NEURAL_NETWORK nn;
-	struct TASK task;
-	int isNetwork;
-	struct result;
+	int deviceId = 0;
+	struct NEURON task;
 
-	if (isNetwork) {
-		// construct neural network
-		constructNN(nn);
-	} 
-	else {
-		// compute task and log result
-		computeTask(task);
+	while(1) {
+		if (task.deviceId == deviceId) {
+			// compute task and log result
+			OUTPUT = {
+				.id : task.id,
+				.value : computeTask(task)
+			};
+		}
 	}
-
 }
 
-float computeTask(task) {
+float computeTask(struct Neuron task) {
 	// get corresponding weights and bias from neural network struct
-	float weights[] = getWeights(task.id);
-	float bias = getBias(task.id);
+	float weights[] = task.weights;
+	float bias = task.bias;
 	
 	// get inputs from the task
 	float inputs[] = task.inputs;
@@ -49,5 +47,6 @@ float sumOfProducts(weights, inputs) {
 }
 
 void constructNN(nn) {
+	network = nn
 }
 
