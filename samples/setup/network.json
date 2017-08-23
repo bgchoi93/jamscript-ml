@@ -2,6 +2,7 @@
     "network": {
         "noofneuronsinl1": 2, 
         "noofoutputs": 4, 
+        "noofhiddenlayers": 1, 
         "noofinputs": 2
     }
 }
