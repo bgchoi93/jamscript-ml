@@ -1,0 +1,7 @@
+{
+    "network": {
+        "noofneuronsinl1": 2, 
+        "noofoutputs": 4, 
+        "noofinputs": 2
+    }
+}
