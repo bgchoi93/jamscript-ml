@@ -3,14 +3,15 @@
 #include <math.h>
 
 int main() {
-	int deviceId = 0;
+	int deviceId = getId();
 	struct NEURON task;
 
 	while(1) {
 		if (task.deviceId == deviceId) {
 			// compute task and log result
 			OUTPUT = {
-				.id : task.id,
+			    .problemId: task.problemId,
+				.neuronId : task.neuronId,
 				.value : computeTask(task)
 			};
 		}
@@ -45,8 +46,3 @@ float sumOfProducts(weights, inputs) {
 		// throw an error
 	}
 }
-
-void constructNN(nn) {
-	network = nn
-}
-
