@@ -3,9 +3,8 @@ jdata{
       		int deviceId;
       		int problemId;
  		int neuronId;
-		float bias;
- 		char* weights;
- 		char* inputs;
+ 		float[] weights;
+ 		float[] inputs;
  	} NEURON_TASK as broadcaster;
  	struct NEURON_RESULT {
       		int problemId;
@@ -16,7 +15,7 @@ jdata{
  		int problemId;
  		int deviceId;
  		int networkId;
- 		char* inputs;
+ 		float[] inputs;
  	} PROBLEM_INPUTS as logger;
 	struct PROBLEM_OUTPUTS {
  		int deviceId;
@@ -31,7 +30,6 @@ var problemTaskBuffer = {};
 var deviceList = [];
 var deviceIterator = 0;
 var deviceId = 0;
-var problemIdIterator = 0;
 
 /*
 *		Helper Functions
@@ -39,11 +37,7 @@ var problemIdIterator = 0;
 
 // jsync function to assign id's to devices
 jsync function getId() {
-    return ++deviceId;
-}
-
-jsync function getProblemId() {
-	return ++problemIdIterator;
+    return ++count;
 }
 
 // Construct a task queue to carry out tasks
@@ -78,7 +72,6 @@ function computeNextLayer(problemId) {
                 deviceId: deviceId,
                 problemId: problemId,
                 neuronId: neuron["id"],
-		bias: neuron["bias"],
                 weights: neuron["weights"],
                 inputs: inputs
             });
