@@ -24,8 +24,8 @@ noofneurons = 3 #noofneurons in each hidden layer
 dataset = df.values
 
 noofcol = len(df.columns)
-Xorig = dataset[0:100,0:noofcol-1]
-Yorig = dataset[0:100,noofcol-1]
+Xorig = dataset[:,0:noofcol-1]
+Yorig = dataset[:,noofcol-1]
 X,Xtest,Y,Ytest = train_test_split(Xorig, Yorig, test_size = 0.2, random_state =seed)
 noofoutput = len(numpy.unique(Y))
 
