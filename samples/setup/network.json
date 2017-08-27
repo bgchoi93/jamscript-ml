@@ -1,8 +1,74 @@
 {
     "network": {
-        "noofneuronsinl1": 2, 
-        "noofoutputs": 4, 
-        "noofhiddenlayers": 1, 
+        "noofoutputs": 4,
+        "noofhiddenlayers": 1,
+        "noofneuronsineachlayer": 2,
         "noofinputs": 2
     }
+}{
+    "hiddenlayer1": [
+        {
+            "neurons": [
+                {
+                    "bias": "5.84797",
+                    "weights": [
+                        "-7.40664", 
+                        "0.403678"
+                    ],
+                    "id": 1
+                },
+                {
+                    "bias": "4.14586",
+                    "weights": [
+                        "-0.0401079",
+                        "-7.53259"
+                    ],
+                    "id": 2
+                }
+            ]
+        }
+    ]
+}{
+    "outputlayer": [
+        {
+            "neurons": [
+                {
+                    "bias": "-0.857621",
+                    "weights": [
+                        "-11.4391",
+                        "-6.47241"
+                    ],
+                    "id": 1,
+                    "label": "Move-Forward"
+                },
+                {
+                    "bias": "-11.2795",
+                    "weights": [
+                        "16.2144",
+                        "-3.28247"
+                    ],
+                    "id": 2,
+                    "label": "Sharp-Right-Turn"
+                },
+                {
+                    "bias": "0.848856",
+                    "weights": [
+                        "-10.6376",
+                        "-38.8977"
+                    ],
+                    "id": 3,
+                    "label": "Slight-Left-Turn"
+                },
+                {
+                    "bias": "-9.70381",
+                    "weights": [
+                        "-17.8565",
+                        "9.49125"
+                    ],
+                    "id": 4,
+                    "label": "Slight-Right-Turn"
+                }
+            ]
+        }
+    ]
 }
