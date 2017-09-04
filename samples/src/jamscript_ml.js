@@ -6,22 +6,22 @@ jdata{
 		float bias;
  		char* weights;
  		char* inputs;
- 	} NEURON_TASK as broadcaster;
+ 	} NeuronTask as broadcaster;
  	struct NEURON_RESULT {
       		int problemId;
  		int neuronId;
  		float value;
- 	} NEURON_RESULT as logger;
- 	struct PROBLEM_INPUTS {
- 		int problemId;
- 		int deviceId;
- 		int networkId;
- 		char* inputs;
- 	} PROBLEM_INPUTS as logger;
-	struct PROBLEM_OUTPUTS {
- 		int deviceId;
- 		int result;
-	} PROBLEM_OUTPUTS as broadcaster;
+ 	} NeuronResult as logger;
+ // 	struct PROBLEM_INPUTS {
+ // 		int problemId;
+ // 		int deviceId;
+ // 		int networkId;
+ // 		char* inputs;
+ // 	} ProblemInput as logger;
+	// struct PROBLEM_OUTPUTS {
+ // 		int deviceId;
+ // 		int result;
+	// } ProblemOutput as broadcaster;
  }
 
 var problems = {};
@@ -61,6 +61,11 @@ function constructTaskQueue(network) {
 	return taskQueue;
 }
 
+// stringfy list
+function stringfyList(list) {
+	return "[" + list + "]";
+}
+
 // Initialize computing the next layer
 function computeNextLayer(problemId) {
     if (this.problemTasks[problemId].length > 0) {
@@ -79,8 +84,8 @@ function computeNextLayer(problemId) {
                 problemId: problemId,
                 neuronId: neuron["id"],
 		bias: neuron["bias"],
-                weights: neuron["weights"],
-                inputs: inputs
+                weights: stringfyList(neuron["weights"]),
+                inputs: stringfyList(inputs)
             });
         });
     }
@@ -141,9 +146,9 @@ function inputBroadcaster (neuronTask) {
 	NEURON_TASK.broadcast(neuronTask);
 }
 
-function resultBroadcaster (result) {
-	PROBLEM_OUTPUTS.broadcast(result);
-}
+// function resultBroadcaster (result) {
+// 	PROBLEM_OUTPUTS.broadcast(result);
+// }
 
-PROBLEM_INPUTS.subscribe(problemInputsListener);
+//PROBLEM_INPUTS.subscribe(problemInputsListener);
 NEURON_RESULT.subscribe(neuronResultListener);
