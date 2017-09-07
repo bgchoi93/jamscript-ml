@@ -1,0 +1,78 @@
+{
+    "network": {
+        "noofoutputs": 2, 
+        "noofhiddenlayers": 2, 
+        "noofneuronsineachlayer": 2, 
+        "noofinputs": 2
+    }
+}{
+    "hiddenlayer1": [
+        {
+            "neurons": [
+                {
+                    "bias": "-1.77556", 
+                    "weights": [
+                        "0.0606311", 
+                        "3.15882"
+                    ], 
+                    "id": 1
+                }, 
+                {
+                    "bias": "-6.91618", 
+                    "weights": [
+                        "5.92025", 
+                        "3.40385"
+                    ], 
+                    "id": 2
+                }
+            ]
+        }
+    ], 
+    "hiddenlayer2": [
+        {
+            "neurons": [
+                {
+                    "bias": "-2.44873", 
+                    "weights": [
+                        "-5.4739", 
+                        "8.68708"
+                    ], 
+                    "id": 1
+                }, 
+                {
+                    "bias": "-4.10444", 
+                    "weights": [
+                        "9.43988", 
+                        "-1.57427"
+                    ], 
+                    "id": 2
+                }
+            ]
+        }
+    ]
+}{
+    "outputlayer": [
+        {
+            "neurons": [
+                {
+                    "bias": "-4.75378", 
+                    "weights": [
+                        "3.28715", 
+                        "-8.25678"
+                    ], 
+                    "id": 1, 
+                    "label": "Move-Forward"
+                }, 
+                {
+                    "bias": "2.54222", 
+                    "weights": [
+                        "-24.6902", 
+                        "4.14922"
+                    ], 
+                    "id": 2, 
+                    "label": "Sharp-Right-Turn"
+                }
+            ]
+        }
+    ]
+}
