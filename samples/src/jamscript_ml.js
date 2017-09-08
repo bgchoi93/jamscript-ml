@@ -47,7 +47,7 @@ function constructTaskQueue(network) {
 	network["layers"].forEach(function(layer){
 		var layerTask = [];
 		layer["neurons"].forEach(function(neuron){
-			neuron["completed"] = 0;
+			neuron["completed"] = false;
 			layerTask.push(neuron);
 		});
 		taskQueue.push(layerTask);
@@ -58,6 +58,24 @@ function constructTaskQueue(network) {
 // stringfy list
 function stringfyList(list) {
 	return "[" + list + "]";
+}
+
+function getResult (outputLayer) {
+	var maxOutput;
+	var result;
+
+	outputLayer.forEach(function(neuron){
+		if (maxOutput === undefined) {
+			maxOutput = neuron["output"];
+			result = neuron["label"];
+		}
+		else if (maxOutput < neuron["output"]) {
+			maxOutput = neuron["output"];
+			result = neuron["label"];
+		}
+	})
+
+	return result;
 }
 
 // Initialize computing the next layer
@@ -85,7 +103,19 @@ function computeNextLayer(problemId) {
     }
     else {
         // logic for output
-        console.log()
+				// logic for output
+        var result = getResult(this.problemTaskBuffer[problemId]);
+				var expectedOutput = this.problemExpectedOutput[problemId];
+        console.log("------------------------");
+        console.log("Problem : " + problemId);
+				console.log("Expected: " + expectedOutput);
+				console.log("Result: " + result);
+				this.problemExecuted++;
+				if (result === expectedOutput) {
+					this.problemCorrect++;
+				}
+				console.log("Accuracy so far: " + this.problemCorrect/this.problemExecuted * 100 + "%");
+				console.log("------------------------");
     }
 }
 
@@ -110,8 +140,8 @@ var problemInputsListener = function (problemId, networkId, deviceId, inputs) {
 	problems[problemId] = deviceId;
 	// Construct a task queue and buffer
 	this.problemTasks[problemId] = constructTaskQueue(network);
-	this.problemInputBuffer[problemId].push(inputs);
-	computeNextLayer();
+	this.problemInputBuffer[problemId] = inputs;
+	computeNextLayer(problemId);
 };
 
 var neuronResultListener = function (key, entry, device) {
@@ -121,7 +151,7 @@ var neuronResultListener = function (key, entry, device) {
             task["output"] = entry.value;
             task["completed"] = true;
         }
-        if (task["completed"] !== 1) {
+        if (task["completed"] !== true) {
             layerCompleted = false;
         }
     });
@@ -149,11 +179,11 @@ function feedProblems() {
 	var arrayOfLines = fs.readFileSync('../setup/sensor_readings_2.data').toString().split("\n").slice(0,100);
 	var testData = arrayOfLines.map(function(line){ return line.split(',') });
 
-	var tempDeviceId = 'CONSOLE';
+	var tempDeviceId = 101;
 	var problemId = 0;
 	testData.forEach(function(entry) {
 		this.problemExpectedOutput[problemId] = entry[engrh.length-1];
-		problemInputsListener(problemId, "feedforward_0", tempDeviceId, inputs);
+		problemInputsListener(problemId, "feedforward_0", tempDeviceId, entry.slice(0, entry.length-1));
 	})
 }
 
