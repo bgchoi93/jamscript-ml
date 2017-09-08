@@ -146,9 +146,9 @@ function inputBroadcaster (neuronTask) {
 	NEURON_TASK.broadcast(neuronTask);
 }
 
-// function resultBroadcaster (result) {
-// 	PROBLEM_OUTPUTS.broadcast(result);
-// }
-
-//PROBLEM_INPUTS.subscribe(problemInputsListener);
 NEURON_RESULT.subscribe(neuronResultListener);
+
+var fs = require('fs');
+var arrayOfLines = fs.readFileSync('./sensor_readings_2.data').toString().split("\n").slice(0,100);
+
+var testData = arrayOfLines.map(function(line){ return line.split(',') });
