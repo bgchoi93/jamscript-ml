@@ -4,3 +4,9 @@ jamscript-ml.iml
 __pycache__
 dump.rdb
 .DS_Store
+a.out
+callgraph.dot
+callgraph.html
+device.conf
+errlog
+jamout.*
