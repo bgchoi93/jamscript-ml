@@ -14,6 +14,7 @@ jdata{
  	} NeuronResult as logger;
  }
 
+console.log("Initializing variables");
 var problems = {};
 var problemTasks = {};
 var problemInputBuffer = {};
@@ -80,12 +81,12 @@ function getResult (outputLayer) {
 
 // Initialize computing the next layer
 function computeNextLayer(problemId) {
-    if (this.problemTasks[problemId].length > 0) {
-        var layerTasks = this.problemTasks[problemId].shift();
+    if (problemTasks[problemId].length > 0) {
+        var layerTasks = problemTasks[problemId].shift();
         problemTaskBuffer[problemId] = layerTasks
         layerTasks.forEach(function(neuron){
             var deviceId = getAvailableDevice();
-            var inputs = this.problemInputBuffer[problemId];
+            var inputs = problemInputBuffer[problemId];
 
             if (inputs.length !== neuron["weights"].length) {
                 // throw an exception
@@ -104,29 +105,29 @@ function computeNextLayer(problemId) {
     else {
         // logic for output
 				// logic for output
-        var result = getResult(this.problemTaskBuffer[problemId]);
-				var expectedOutput = this.problemExpectedOutput[problemId];
+        var result = getResult(problemTaskBuffer[problemId]);
+				var expectedOutput = problemExpectedOutput[problemId];
         console.log("------------------------");
         console.log("Problem : " + problemId);
 				console.log("Expected: " + expectedOutput);
 				console.log("Result: " + result);
-				this.problemExecuted++;
+				problemExecuted++;
 				if (result === expectedOutput) {
-					this.problemCorrect++;
+					problemCorrect++;
 				}
-				console.log("Accuracy so far: " + this.problemCorrect/this.problemExecuted * 100 + "%");
+				console.log("Accuracy so far: " + problemCorrect/problemExecuted * 100 + "%");
 				console.log("------------------------");
     }
 }
 
 // Get available device (simple implementation for now)
 function getAvailableDevice() {
-    var deviceId = this.deviceList[this.deviceIterator];
-    if (this.deviceList.length > this.deviceIterator) {
-        this.deviceIterator = this.deviceIterator + 1;
+    var deviceId = deviceList[deviceIterator];
+    if (deviceList.length > deviceIterator) {
+        deviceIterator = deviceIterator + 1;
     }
     else {
-        this.deviceIterator = 0;
+        deviceIterator = 0;
     }
     return deviceId;
 }
@@ -139,14 +140,14 @@ var problemInputsListener = function (problemId, networkId, deviceId, inputs) {
 	// add task to a problems dictionary - {problemId:deviceId}
 	problems[problemId] = deviceId;
 	// Construct a task queue and buffer
-	this.problemTasks[problemId] = constructTaskQueue(network);
-	this.problemInputBuffer[problemId] = inputs;
+	problemTasks[problemId] = constructTaskQueue(network);
+	problemInputBuffer[problemId] = inputs;
 	computeNextLayer(problemId);
 };
 
 var neuronResultListener = function (key, entry, device) {
     var layerCompleted = true;
-    this.problemTaskBuffer[entry.problemId].forEach(function(task){
+    problemTaskBuffer[entry.problemId].forEach(function(task){
         if (task["id"] === entry.neuronId) {
             task["output"] = entry.value;
             task["completed"] = true;
@@ -158,9 +159,9 @@ var neuronResultListener = function (key, entry, device) {
 
     if (layerCompleted) {
         // initialize new input buffer for the next layer
-        this.problemInputBuffer[entry.problemId] = [];
-        this.problemTaskBuffer[entry.problemId].forEach(function(task){
-            this.problemInputBuffer[entry.problemId].push(task["output"]);
+        problemInputBuffer[entry.problemId] = [];
+        problemTaskBuffer[entry.problemId].forEach(function(task){
+            problemInputBuffer[entry.problemId].push(task["output"]);
         })
 
         computeNextLayer(entry.problemId);
@@ -171,7 +172,7 @@ function inputBroadcaster (neuronTask) {
 	NEURON_TASK.broadcast(neuronTask);
 }
 
-NEURON_RESULT.subscribe(neuronResultListener);
+NeuronResult.subscribe(neuronResultListener);
 
 
 function feedProblems() {
@@ -182,9 +183,21 @@ function feedProblems() {
 	var tempDeviceId = 101;
 	var problemId = 0;
 	testData.forEach(function(entry) {
-		this.problemExpectedOutput[problemId] = entry[engrh.length-1];
+		problemExpectedOutput[problemId] = entry[engrh.length-1];
 		problemInputsListener(problemId, "feedforward_0", tempDeviceId, entry.slice(0, entry.length-1));
 	})
 }
 
-feedProblems();
+var initialLoad = setInterval(function(){
+    if (deviceList.length > 0) {
+        console.log("Devices are available: " + deviceList);
+        console.log("Starting simulation");
+	feedProblems();
+	clearInterval(intialLoad);
+    }
+    else {
+        console.log("Device is not available yet");
+    }
+}, 10000);
+
+console.log("===============Fog Started===============");

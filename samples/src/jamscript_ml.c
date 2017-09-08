@@ -85,6 +85,7 @@ float computeTask(struct NEURON_TASK task) {
 
 int main() {
 	int deviceId = getId();
+	printf("Device ID: %d", deviceId);
 	struct NEURON_TASK assignedTask;
   assignedTask = NeuronTask;
 	while(1) {
