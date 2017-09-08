@@ -12,16 +12,6 @@ jdata{
  		int neuronId;
  		float value;
  	} NeuronResult as logger;
- // 	struct PROBLEM_INPUTS {
- // 		int problemId;
- // 		int deviceId;
- // 		int networkId;
- // 		char* inputs;
- // 	} ProblemInput as logger;
-	// struct PROBLEM_OUTPUTS {
- // 		int deviceId;
- // 		int result;
-	// } ProblemOutput as broadcaster;
  }
 
 var problems = {};
@@ -32,6 +22,10 @@ var deviceList = [];
 var deviceIterator = 0;
 var deviceId = 0;
 var problemIdIterator = 0;
+
+var problemExpectedOutput = {};
+var problemCorrect = 0;
+var problemExecuted = 0;
 
 /*
 *		Helper Functions
@@ -91,6 +85,7 @@ function computeNextLayer(problemId) {
     }
     else {
         // logic for output
+        console.log()
     }
 }
 
@@ -107,15 +102,15 @@ function getAvailableDevice() {
 }
 
 // Listener for new ML problem logger
-var problemInputsListener = function (key, entry, device) {
-	var networkId = entry.networkId;
+var problemInputsListener = function (problemId, networkId, deviceId, inputs) {
+	var networkId = networkId;
 	var network = require('../setup/network.json')["networks"][networkId];
 
 	// add task to a problems dictionary - {problemId:deviceId}
-	problems[entiry.problemId] = entry.deviceId;
+	problems[problemId] = deviceId;
 	// Construct a task queue and buffer
-	this.problemTasks[entry.problemId] = constructTaskQueue(network);
-	this.problemInputBuffer[entry.problemId].push(entry.inputs);
+	this.problemTasks[problemId] = constructTaskQueue(network);
+	this.problemInputBuffer[problemId].push(inputs);
 	computeNextLayer();
 };
 
@@ -148,7 +143,18 @@ function inputBroadcaster (neuronTask) {
 
 NEURON_RESULT.subscribe(neuronResultListener);
 
-var fs = require('fs');
-var arrayOfLines = fs.readFileSync('./sensor_readings_2.data').toString().split("\n").slice(0,100);
 
-var testData = arrayOfLines.map(function(line){ return line.split(',') });
+function feedProblems() {
+	var fs = require('fs');
+	var arrayOfLines = fs.readFileSync('../setup/sensor_readings_2.data').toString().split("\n").slice(0,100);
+	var testData = arrayOfLines.map(function(line){ return line.split(',') });
+
+	var tempDeviceId = 'CONSOLE';
+	var problemId = 0;
+	testData.forEach(function(entry) {
+		this.problemExpectedOutput[problemId] = entry[engrh.length-1];
+		problemInputsListener(problemId, "feedforward_0", tempDeviceId, inputs);
+	})
+}
+
+feedProblems();
