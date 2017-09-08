@@ -1,2 +1,6 @@
 .idea/
 jamscript-ml.iml
+*/.ipynb_checkpoints
+__pycache__
+dump.rdb
+.DS_Store

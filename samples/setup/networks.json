@@ -1,0 +1,22 @@
+{
+	"networks": {
+		"feedforward_0": {
+			"layers": [
+				{
+					"neurons": [
+						{
+							"id": 0,
+							"bias": 0.31,
+							"weights": [0.1, 0.2, 0.3, 0.4]
+						},
+						{
+							"id": 1,
+							"bias": 0.1,
+							"weights": [0.1, 0.2, 0.3, 0.4]
+						}
+					]
+				}
+			]
+		}
+	}
+}
