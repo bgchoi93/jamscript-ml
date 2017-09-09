@@ -85,11 +85,12 @@ float computeTask(struct NEURON_TASK task) {
 
 int main() {
 	int deviceId = getId();
-	printf("Device ID: %d", deviceId);
+	printf("Device ID: %d\n", deviceId);
 	struct NEURON_TASK assignedTask;
-  assignedTask = NeuronTask;
 	while(1) {
+		assignedTask = NeuronTask;
 		if (assignedTask.deviceId == deviceId) {
+			printf("Task is assigned\n");
 			// compute task and log result
 			NeuronResult = {
 			  .problemId: assignedTask.problemId,

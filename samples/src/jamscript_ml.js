@@ -34,11 +34,10 @@ var problemExecuted = 0;
 
 // jsync function to assign id's to devices
 jsync function getId() {
-    return ++deviceId;
-}
-
-jsync function getProblemId() {
-	return ++problemIdIterator;
+    console.log("GetId is called. Assigning device id: " + deviceId);
+    deviceList.push(deviceId);
+    deviceId++;
+    return deviceId-1;
 }
 
 // Construct a task queue to carry out tasks
@@ -85,7 +84,7 @@ function computeNextLayer(problemId) {
         var layerTasks = problemTasks[problemId].shift();
         problemTaskBuffer[problemId] = layerTasks
         layerTasks.forEach(function(neuron){
-            var deviceId = getAvailableDevice();
+            var targetDeviceId = getAvailableDevice();
             var inputs = problemInputBuffer[problemId];
 
             if (inputs.length !== neuron["weights"].length) {
@@ -93,7 +92,7 @@ function computeNextLayer(problemId) {
             }
             // broadcast neuron task to a device
             inputBroadcaster({
-                deviceId: deviceId,
+                deviceId: targetDeviceId,
                 problemId: problemId,
                 neuronId: neuron["id"],
 		bias: neuron["bias"],
@@ -122,23 +121,22 @@ function computeNextLayer(problemId) {
 
 // Get available device (simple implementation for now)
 function getAvailableDevice() {
-    var deviceId = deviceList[deviceIterator];
+    var targetDeviceId = deviceList[deviceIterator];
     if (deviceList.length > deviceIterator) {
         deviceIterator = deviceIterator + 1;
     }
     else {
         deviceIterator = 0;
     }
-    return deviceId;
+    return targetDeviceId;
 }
 
 // Listener for new ML problem logger
-var problemInputsListener = function (problemId, networkId, deviceId, inputs) {
-	var networkId = networkId;
-	var network = require('../setup/network.json')["networks"][networkId];
-
-	// add task to a problems dictionary - {problemId:deviceId}
-	problems[problemId] = deviceId;
+var problemInputsListener = function (problemId, sourceDeviceId, inputs) {
+	var network = require('../setup/network.json')["networks"];
+	console.log(network);
+	// add task to a problems dictionary - {problemId:sourceDeviceId}
+	problems[problemId] = sourceDeviceId;
 	// Construct a task queue and buffer
 	problemTasks[problemId] = constructTaskQueue(network);
 	problemInputBuffer[problemId] = inputs;
@@ -169,7 +167,7 @@ var neuronResultListener = function (key, entry, device) {
 };
 
 function inputBroadcaster (neuronTask) {
-	NEURON_TASK.broadcast(neuronTask);
+	NeuronTask.broadcast(neuronTask);
 }
 
 NeuronResult.subscribe(neuronResultListener);
@@ -183,21 +181,23 @@ function feedProblems() {
 	var tempDeviceId = 101;
 	var problemId = 0;
 	testData.forEach(function(entry) {
-		problemExpectedOutput[problemId] = entry[engrh.length-1];
-		problemInputsListener(problemId, "feedforward_0", tempDeviceId, entry.slice(0, entry.length-1));
+		problemExpectedOutput[problemId] = entry[entry.length-1];
+		problemInputsListener(problemId, tempDeviceId, entry.slice(0, entry.length-1));
 	})
 }
 
+console.log("===============Fog Started===============");
+
 var initialLoad = setInterval(function(){
     if (deviceList.length > 0) {
+	clearInterval(initialLoad);
         console.log("Devices are available: " + deviceList);
         console.log("Starting simulation");
 	feedProblems();
-	clearInterval(intialLoad);
     }
     else {
         console.log("Device is not available yet");
     }
 }, 10000);
 
-console.log("===============Fog Started===============");
+

@@ -1,6 +1,5 @@
 {
-  "networks": {
-    "feedforward_0": {
+    "networks": {
       "layers": [
         {
             "neurons": [
@@ -65,4 +64,3 @@
       ]
     }
   }
-}
