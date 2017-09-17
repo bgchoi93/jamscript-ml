@@ -26,6 +26,11 @@ var deviceId = 0;
 var problemExpectedOutput = {};
 var problemCorrect = 0;
 var problemExecuted = 0;
+var numberOfProblems = 2;
+var minNumberOfDevices = 1;
+
+var startTime;
+var finishTime;
 
 /*
 *		Helper Functions
@@ -122,6 +127,8 @@ function computeNextLayer(problemId) {
 }
 
 function handleCompletedProblem(problemId){
+	console.log(problemTaskBuffer[problemId]);
+	console.log(problemInputBuffer[problemId]);
 	var result = getResult(problemTaskBuffer[problemId]);
 	var expectedOutput = problemExpectedOutput[problemId];
 	console.log("------------------------");
@@ -132,17 +139,31 @@ function handleCompletedProblem(problemId){
 	if (result === expectedOutput) {
 		problemCorrect++;
 	}
+	
 	console.log("Accuracy: " + problemCorrect/problemExecuted * 100 + "%");
 	console.log("------------------------");
 
 	delete problemTaskBuffer[problemId];
 	delete problemInputBuffer[problemId];
 	delete problemTasks[problemId];
+
+	if (problemExecuted === numberOfProblems) {
+		finishTime = new Date();
+		var solvingTime = finishTime - startTime;
+		var seconds = Math.floor(solvingTime/1000);
+		var minutes = Math.floor(seconds/60);
+		
+		console.log("===============End of Simulation===============")
+		console.log("Number of devices used: " + deviceList.length);
+		console.log("Duration of simulation: " + minutes + "Minutes " + (seconds - minutes * 60) + " Seconds");
+		console.log("Problems simulated: " + numberOfProblems);
+		console.log("Accuracy: " + problemCorrect/problemExecuted * 100 + "%");
+	}
 }
 
 // Get available device (simple implementation for now)
 function getAvailableDevice() {
-    return deviceList[Math.floor(Math.random()*deviceList.length)];
+    return deviceList[Math.floor(Math.random() * deviceList.length)];
 }
 
 // Listener for new ML problem logger
@@ -152,27 +173,34 @@ var problemInputsListener = function (problemId, sourceDeviceId, inputs) {
 	problems[problemId] = sourceDeviceId;
 	// Construct a task queue and buffer
 	problemTasks[problemId] = constructTaskQueue(network);
+	console.log(problemTasks[problemId]);
 	problemInputBuffer[problemId] = inputs;
 	computeNextLayer(problemId);
 };
 
 var neuronResultListener = function (key, entry, device) {
-		// check if problem is solved already
-		if (problemTasks[entry.log.problemId]) {
-			var layerCompleted = true;
+	// check if problem is solved already
+	if (problemTasks[entry.log.problemId]) {
+		var layerCompleted = true;
 
-			// flag neuron as completed
+		// flag neuron as completed
+		console.log("Problem: " + entry.log.problemId);
+		console.log("Updating neuron " + entry.log.neuronId);
+		console.log("Result: " + entry.log.value);
+		console.log("ProblemTaskBuffer:");
+		console.log(problemTaskBuffer[entry.log.problemId]);
+		
 	    problemTaskBuffer[entry.log.problemId].forEach(function(task){
-	        if (task["id"] === entry.log.neuronId) {
-	            task["output"] = entry.log.value;
-	            task["completed"] = true;
-	        }
-	        if (task["completed"] !== true) {
-	            layerCompleted = false;
-	        }
-	    });
+			if (task["id"] === entry.log.neuronId) {
+				task["output"] = entry.log.value;
+				task["completed"] = true;
+			}
+			if (task["completed"] !== true) {
+			   layerCompleted = false;
+			}
+		});
 
-			// if layer is completed, move on to the next layer
+		// if layer is completed, move on to the next layer
 	    if (layerCompleted) {
 	        // initialize new input buffer for the next layer
 	        problemInputBuffer[entry.log.problemId] = [];
@@ -182,7 +210,7 @@ var neuronResultListener = function (key, entry, device) {
 
 	        computeNextLayer(entry.log.problemId);
 	    }
-		}
+	}
 };
 
 function inputBroadcaster (neuronTask) {
@@ -194,7 +222,7 @@ NeuronResult.subscribe(neuronResultListener);
 
 function feedProblems() {
 	var fs = require('fs');
-	var arrayOfLines = fs.readFileSync('../setup/sensor_readings_2.data').toString().split("\n").slice(0,2);
+	var arrayOfLines = fs.readFileSync('../setup/sensor_readings_2.data').toString().split("\n").slice(0,numberOfProblems);
 	var testData = arrayOfLines.map(function(line){ return line.split(',') });
 
 	var tempDeviceId = 101;
@@ -208,10 +236,11 @@ function feedProblems() {
 console.log("===============Fog Started===============");
 
 var initialLoad = setInterval(function(){
-    if (deviceList.length > 3) {
+    if (deviceList.length >= minNumberOfDevices) {
 	clearInterval(initialLoad);
         console.log("Devices are available: " + deviceList);
         console.log("Starting simulation");
+		startTime = new Date();
 		feedProblems();
     }
     else {
