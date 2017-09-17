@@ -26,11 +26,8 @@ var deviceId = 0;
 var problemExpectedOutput = {};
 var problemCorrect = 0;
 var problemExecuted = 0;
-var numberOfProblems = 2;
-var minNumberOfDevices = 1;
-
-var startTime;
-var finishTime;
+var numberOfProblems = 100;
+var minNumberOfDevices = 4;
 
 /*
 *		Helper Functions
@@ -53,14 +50,20 @@ function getGuid() {
 }
 
 // Construct a task queue to carry out tasks
-function constructTaskQueue(network) {
-	var taskQueue = [];
+function constructTaskQueue() {
+	var network = require('../setup/network.json')["networks"];
 
+	var taskQueue = [];
 	network["layers"].forEach(function(layer){
 		var layerTask = [];
 		layer["neurons"].forEach(function(neuron){
-			neuron["completed"] = false;
-			layerTask.push(neuron);
+			var neuronTask = {};
+			neuronTask["id"] = neuron["id"];
+			neuronTask["bias"] = neuron["bias"];
+			neuronTask["weights"] = neuron["weights"];
+			neuronTask["label"] = neuron["label"];
+			neuronTask["completed"] = false;
+			layerTask.push(neuronTask);
 		});
 		taskQueue.push(layerTask);
 	});
@@ -96,17 +99,17 @@ function computeNextLayer(problemId) {
 	if (problemTasks[problemId]) {
 		// assign neurons tasks from the next layer
 		if (problemTasks[problemId].length > 0) {
-			var layerTasks = problemTasks[problemId].shift();
-			problemTaskBuffer[problemId] = layerTasks
-			layerTasks.forEach(function(neuron){
+
+			problemTaskBuffer[problemId] = [];
+			problemTaskBuffer[problemId] = problemTasks[problemId].shift();
+
+			problemTaskBuffer[problemId].forEach(function(neuron){
 			    var targetDeviceId = getAvailableDevice();
 			    var inputs = problemInputBuffer[problemId];
 
 			    if (inputs.length !== neuron["weights"].length) {
 			        // throw an exception
 			    }
-				console.log("Assigning a task to device: " + targetDeviceId);
-				console.log("ProblemId: " + problemId);
 
 			    // broadcast neuron task to a device
 			    inputBroadcaster({
@@ -127,8 +130,6 @@ function computeNextLayer(problemId) {
 }
 
 function handleCompletedProblem(problemId){
-	console.log(problemTaskBuffer[problemId]);
-	console.log(problemInputBuffer[problemId]);
 	var result = getResult(problemTaskBuffer[problemId]);
 	var expectedOutput = problemExpectedOutput[problemId];
 	console.log("------------------------");
@@ -139,7 +140,7 @@ function handleCompletedProblem(problemId){
 	if (result === expectedOutput) {
 		problemCorrect++;
 	}
-	
+	console.log("Problems simulated: " + problemExecuted);
 	console.log("Accuracy: " + problemCorrect/problemExecuted * 100 + "%");
 	console.log("------------------------");
 
@@ -148,14 +149,7 @@ function handleCompletedProblem(problemId){
 	delete problemTasks[problemId];
 
 	if (problemExecuted === numberOfProblems) {
-		finishTime = new Date();
-		var solvingTime = finishTime - startTime;
-		var seconds = Math.floor(solvingTime/1000);
-		var minutes = Math.floor(seconds/60);
-		
 		console.log("===============End of Simulation===============")
-		console.log("Number of devices used: " + deviceList.length);
-		console.log("Duration of simulation: " + minutes + "Minutes " + (seconds - minutes * 60) + " Seconds");
 		console.log("Problems simulated: " + numberOfProblems);
 		console.log("Accuracy: " + problemCorrect/problemExecuted * 100 + "%");
 	}
@@ -168,12 +162,10 @@ function getAvailableDevice() {
 
 // Listener for new ML problem logger
 var problemInputsListener = function (problemId, sourceDeviceId, inputs) {
-	var network = require('../setup/network.json')["networks"];
 	// add task to a problems dictionary - {problemId:sourceDeviceId}
 	problems[problemId] = sourceDeviceId;
 	// Construct a task queue and buffer
-	problemTasks[problemId] = constructTaskQueue(network);
-	console.log(problemTasks[problemId]);
+	problemTasks[problemId] = constructTaskQueue();
 	problemInputBuffer[problemId] = inputs;
 	computeNextLayer(problemId);
 };
@@ -184,12 +176,6 @@ var neuronResultListener = function (key, entry, device) {
 		var layerCompleted = true;
 
 		// flag neuron as completed
-		console.log("Problem: " + entry.log.problemId);
-		console.log("Updating neuron " + entry.log.neuronId);
-		console.log("Result: " + entry.log.value);
-		console.log("ProblemTaskBuffer:");
-		console.log(problemTaskBuffer[entry.log.problemId]);
-		
 	    problemTaskBuffer[entry.log.problemId].forEach(function(task){
 			if (task["id"] === entry.log.neuronId) {
 				task["output"] = entry.log.value;
@@ -240,7 +226,6 @@ var initialLoad = setInterval(function(){
 	clearInterval(initialLoad);
         console.log("Devices are available: " + deviceList);
         console.log("Starting simulation");
-		startTime = new Date();
 		feedProblems();
     }
     else {
