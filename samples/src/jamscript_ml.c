@@ -78,7 +78,7 @@ float computeTask(struct NEURON_TASK task) {
 	float bias = task.bias;
 
 	// compute result
-	float result = 1.0 / (1.0 + sumOfProducts(weights, inputs, getLength(task.weights)) - bias);
+	float result = 1.0 / (1.0 + exp(-sumOfProducts(weights, inputs, getLength(task.weights)) - bias));
 	return result;
 }
 
@@ -92,10 +92,15 @@ int main() {
 		if (assignedTask.deviceId == deviceId) {
 			printf("Task is assigned\n");
 			// compute task and log result
+			float result = computeTask(assignedTask);
+			printf("Result for problem %d, neuron %d : %f\n", assignedTask.problemId, assignedTask.neuronId, result);
+			printf("Weights: %s\n", assignedTask.weights);
+			printf("Inputs: %s\n", assignedTask.inputs);
+			printf("bias: %f\n", assignedTask.bias);
 			NeuronResult = {
-			  .problemId: assignedTask.problemId,
+				.problemId: assignedTask.problemId,
 				.neuronId : assignedTask.neuronId,
-				.value : computeTask(assignedTask)
+				.value : result
 			};
 		}
 		sleep(1);

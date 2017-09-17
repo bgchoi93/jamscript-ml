@@ -1,14 +1,14 @@
 jdata{
 	struct NEURON_TASK {
-      		int deviceId;
-      		int problemId;
+      	int deviceId;
+      	char* problemId;
  		int neuronId;
 		float bias;
  		char* weights;
  		char* inputs;
  	} NeuronTask as broadcaster;
  	struct NEURON_RESULT {
-      		int problemId;
+      	char* problemId;
  		int neuronId;
  		float value;
  	} NeuronResult as logger;
@@ -22,7 +22,6 @@ var problemTaskBuffer = {};
 var deviceList = [];
 var deviceIterator = 0;
 var deviceId = 0;
-var problemIdIterator = 0;
 
 var problemExpectedOutput = {};
 var problemCorrect = 0;
@@ -34,10 +33,18 @@ var problemExecuted = 0;
 
 // jsync function to assign id's to devices
 jsync function getId() {
-    console.log("GetId is called. Assigning device id: " + deviceId);
     deviceList.push(deviceId);
     deviceId++;
     return deviceId-1;
+}
+
+function S4() {
+    return (((1+Math.random())*0x10000)|0).toString(16).substring(1); 
+}
+
+function getGuid() {
+	guid = (S4() + S4() + "-" + S4() + "-4" + S4().substr(0,3) + "-" + S4() + "-" + S4() + S4() + S4()).toLowerCase();
+	return guid;
 }
 
 // Construct a task queue to carry out tasks
@@ -80,61 +87,61 @@ function getResult (outputLayer) {
 
 // Initialize computing the next layer
 function computeNextLayer(problemId) {
-    if (problemTasks[problemId].length > 0) {
-        var layerTasks = problemTasks[problemId].shift();
-        problemTaskBuffer[problemId] = layerTasks
-        layerTasks.forEach(function(neuron){
-            var targetDeviceId = getAvailableDevice();
-            var inputs = problemInputBuffer[problemId];
+	if (problemTasks[problemId]) {
+		if (problemTasks[problemId].length > 0) {
+			var layerTasks = problemTasks[problemId].shift();
+			problemTaskBuffer[problemId] = layerTasks
+			layerTasks.forEach(function(neuron){
+			    var targetDeviceId = getAvailableDevice();
+			    var inputs = problemInputBuffer[problemId];
 
-            if (inputs.length !== neuron["weights"].length) {
-                // throw an exception
-            }
-            // broadcast neuron task to a device
-            inputBroadcaster({
-                deviceId: targetDeviceId,
-                problemId: problemId,
-                neuronId: neuron["id"],
-		bias: neuron["bias"],
-                weights: stringfyList(neuron["weights"]),
-                inputs: stringfyList(inputs)
-            });
-        });
-    }
-    else {
-        // logic for output
-				// logic for output
-        var result = getResult(problemTaskBuffer[problemId]);
-				var expectedOutput = problemExpectedOutput[problemId];
-        console.log("------------------------");
-        console.log("Problem : " + problemId);
-				console.log("Expected: " + expectedOutput);
-				console.log("Result: " + result);
-				problemExecuted++;
-				if (result === expectedOutput) {
-					problemCorrect++;
-				}
-				console.log("Accuracy so far: " + problemCorrect/problemExecuted * 100 + "%");
-				console.log("------------------------");
-    }
+			    if (inputs.length !== neuron["weights"].length) {
+			        // throw an exception
+			    }
+				console.log("Assigning a task to device: " + targetDeviceId);
+				console.log("ProblemId: " + problemId);
+			    // broadcast neuron task to a device
+			    inputBroadcaster({
+			        deviceId: targetDeviceId,
+			        problemId: problemId,
+			        neuronId: neuron["id"],
+			bias: neuron["bias"],
+			        weights: stringfyList(neuron["weights"]),
+			        inputs: stringfyList(inputs)
+			    });
+			});
+		}
+		else {
+			// logic for output
+			var result = getResult(problemTaskBuffer[problemId]);
+			var expectedOutput = problemExpectedOutput[problemId];
+			console.log("------------------------");
+			console.log("Problem : " + problemId);
+			console.log("Expected: " + expectedOutput);
+			console.log("Result: " + result);
+			problemExecuted++;
+			if (result === expectedOutput) {
+				problemCorrect++;
+			}
+			console.log("Accuracy: " + problemCorrect/problemExecuted * 100 + "%");
+			console.log("------------------------");
+	
+			delete problemTaskBuffer[problemId];
+			delete problemInputBuffer[problemId];
+			delete problemTasks[problemId];
+		}
+	}
+    
 }
 
 // Get available device (simple implementation for now)
 function getAvailableDevice() {
-    var targetDeviceId = deviceList[deviceIterator];
-    if (deviceList.length > deviceIterator) {
-        deviceIterator = deviceIterator + 1;
-    }
-    else {
-        deviceIterator = 0;
-    }
-    return targetDeviceId;
+    return deviceList[Math.floor(Math.random()*deviceList.length)];
 }
 
 // Listener for new ML problem logger
 var problemInputsListener = function (problemId, sourceDeviceId, inputs) {
 	var network = require('../setup/network.json')["networks"];
-	console.log(network);
 	// add task to a problems dictionary - {problemId:sourceDeviceId}
 	problems[problemId] = sourceDeviceId;
 	// Construct a task queue and buffer
@@ -144,10 +151,11 @@ var problemInputsListener = function (problemId, sourceDeviceId, inputs) {
 };
 
 var neuronResultListener = function (key, entry, device) {
+	console.log("In neuron result listener: " + entry.log.problemId);
     var layerCompleted = true;
-    problemTaskBuffer[entry.problemId].forEach(function(task){
-        if (task["id"] === entry.neuronId) {
-            task["output"] = entry.value;
+    problemTaskBuffer[entry.log.problemId].forEach(function(task){
+        if (task["id"] === entry.log.neuronId) {
+            task["output"] = entry.log.value;
             task["completed"] = true;
         }
         if (task["completed"] !== true) {
@@ -157,12 +165,12 @@ var neuronResultListener = function (key, entry, device) {
 
     if (layerCompleted) {
         // initialize new input buffer for the next layer
-        problemInputBuffer[entry.problemId] = [];
-        problemTaskBuffer[entry.problemId].forEach(function(task){
-            problemInputBuffer[entry.problemId].push(task["output"]);
+        problemInputBuffer[entry.log.problemId] = [];
+        problemTaskBuffer[entry.log.problemId].forEach(function(task){
+            problemInputBuffer[entry.log.problemId].push(task["output"]);
         })
 
-        computeNextLayer(entry.problemId);
+        computeNextLayer(entry.log.problemId);
     }
 };
 
@@ -175,12 +183,12 @@ NeuronResult.subscribe(neuronResultListener);
 
 function feedProblems() {
 	var fs = require('fs');
-	var arrayOfLines = fs.readFileSync('../setup/sensor_readings_2.data').toString().split("\n").slice(0,100);
+	var arrayOfLines = fs.readFileSync('../setup/sensor_readings_2.data').toString().split("\n").slice(0,2);
 	var testData = arrayOfLines.map(function(line){ return line.split(',') });
 
 	var tempDeviceId = 101;
-	var problemId = 0;
 	testData.forEach(function(entry) {
+		var problemId = getGuid();
 		problemExpectedOutput[problemId] = entry[entry.length-1];
 		problemInputsListener(problemId, tempDeviceId, entry.slice(0, entry.length-1));
 	})
@@ -189,11 +197,11 @@ function feedProblems() {
 console.log("===============Fog Started===============");
 
 var initialLoad = setInterval(function(){
-    if (deviceList.length > 0) {
+    if (deviceList.length > 3) {
 	clearInterval(initialLoad);
         console.log("Devices are available: " + deviceList);
         console.log("Starting simulation");
-	feedProblems();
+		feedProblems();
     }
     else {
         console.log("Device is not available yet");
